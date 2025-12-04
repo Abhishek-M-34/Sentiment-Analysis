@@ -50,16 +50,25 @@ def resultOutput(result):
         return "Negative"
     
 def sentiment_prediction(sentence_input):
-    sentence_value = preprocess(sentence_input) # possible error (float not used, cause it cames as sentence)
-    if sentence_value is None:
-        return "Enter Sentence to analyse sentiment."
+    try:
+        sentence_value = preprocess(sentence_input) # possible error (float not used, cause it cames as sentence)
+        if sentence_value is None:
+            return "Enter Sentence to analyse sentiment."
     
-    if vectorizer is not None and hasattr(vectorizer,'transform'):
-        vectorized_data = vectorizer.transform(sentence_value)
-    else:
-        print("Vectorizer not available or invalid")
+        if vectorizer is not None and hasattr(vectorizer,'transform'):
+            vectorized_data = vectorizer.transform(sentence_value)
+        else:
+            print("Vectorizer not available or invalid")
 
-    prediction = model.predict(vectorized_data)
-    probabilities = model.predict_proba(vectorized_data)
+        prediction = model.predict(vectorized_data)
+        probabilities = model.predict_proba(vectorized_data)
+        predicted_sentiment = int(prediction[0])
+        confidence = probabilities[0][predicted_sentiment]
+
+        return predicted_sentiment,confidence 
+    except Exception as e:
+        return f"Prediction Error {e}"
+    
+
 
     
