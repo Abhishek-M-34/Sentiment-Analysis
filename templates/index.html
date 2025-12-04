@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analyzer</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Sentiment Analyzer</h1>
+        <p class="subtitle">Analyze the sentiment of any text using AI</p>
+
+        <form id="sentimentForm">
+            <div class="input-group">
+                <label for="sentence">Enter your text:</label>
+                <textarea 
+                    id="sentence" 
+                    name="sentence" 
+                    placeholder="Type or paste your text here..."
+                    required
+                ></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="analyzeBtn">
+                Analyze Sentiment
+            </button>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Analyzing...</p>
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="emoji" id="emoji"></div>
+            <div class="result-title" id="resultTitle"></div>
+            <div class="confidence" id="confidence"></div>
+            <div class="analyzed-text" id="analyzedText"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('sentimentForm');
+        const loader = document.getElementById('loader');
+        const resultContainer = document.getElementById('resultContainer');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const sentence = document.getElementById('sentence').value.trim();
+
+            if (!sentence) {
+                showResult('error', 'Error', 'Please enter some text to analyze.', '', '❌');
+                return;
+            }
+
+            // Show loader
+            loader.style.display = 'block';
+            resultContainer.style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('sentence', sentence);
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                loader.style.display = 'none';
+                analyzeBtn.disabled = false;
+
+                if (data.success) {
+                    const sentiment = data.prediction.toLowerCase();
+                    let emoji = '';
+                    
+                    if (sentiment === 'positive') {
+                        emoji = '😊';
+                    } else if (sentiment === 'negative') {
+                        emoji = '😞';
+                    } else {
+                        emoji = '😐';
+                    }
+
+                    showResult(
+                        sentiment,
+                        data.prediction,
+                        `Confidence: ${data.confidence}`,
+                        `"${data.details.sentence}"`,
+                        emoji
+                    );
+                } else {
+                    showResult('error', 'Error', data.error, '', '❌');
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                analyzeBtn.disabled = false;
+                showResult('error', 'Error', 'Failed to connect to the server. Please try again.', '', '❌');
+            }
+        });
+
+        function showResult(type, title, confidence, text, emoji) {
+            resultContainer.className = 'result-container ' + type;
+            document.getElementById('emoji').textContent = emoji;
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('confidence').textContent = confidence;
+            document.getElementById('analyzedText').textContent = text;
+            resultContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

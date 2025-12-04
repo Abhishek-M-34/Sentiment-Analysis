@@ -69,6 +69,42 @@ def sentiment_prediction(sentence_input):
     except Exception as e:
         return f"Prediction Error {e}"
     
+@app.route('/')
+def home():
+    return render_template('index.html')
 
+@app.route('/predict',method=['POST'])
+def predict():
+    try:
+        sentence_input = request.form.get('sentence',"")
 
+        if not sentence_input:
+            return jsonify({
+                'success': False,
+                'error': 'Please enter the sentence first.'
+            })
+        result, confidence = sentiment_prediction(sentence_input)
+
+        if isinstance(result, str) and (result.startswith("Error") or result.startswith("Prediction Error")):
+            return jsonify({
+                'success': False,
+                'error': result
+            })
+        result_output = resultOutput(result)
+
+        return jsonify({
+            'success': True,
+            'prediction': result_output,
+            'confidence': f"{confidence:.2%}",
+            'details': {
+                'sentence': sentence_input,
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Unexpected error: {str(e)}'
+        })
     
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
