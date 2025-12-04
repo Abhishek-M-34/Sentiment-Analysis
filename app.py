@@ -34,10 +34,8 @@ model,vectorizer = load_model()
 def preprocess(sentence_input):
     text = re.sub(r'[^0-9a-zA-Z]+',' ',sentence_input).split()
     words = [x.lower() for x in text if x not in stopwords.words('english')]
-    
     lemma = WordNetLemmatizer()
     word = [lemma.lemmatize(word,'v') for word in words ]
-    
     word = ' '.join(word)
     return word
 
@@ -73,7 +71,7 @@ def sentiment_prediction(sentence_input):
 def home():
     return render_template('index.html')
 
-@app.route('/predict',method=['POST'])
+@app.route('/predict',methods=['POST'])
 def predict():
     try:
         sentence_input = request.form.get('sentence',"")
