@@ -21,21 +21,23 @@ def load_model():
         except Exception as e:
             print(f'Vectorizer not found or invalid {e}')
         
-        return model,vectorizer
+        return model, vectorizer
     except FileNotFoundError as e:
         print(f'Model not found or invalid {e}')
-        return None,None
+        return None, None
     except Exception as e:
         print(f'Error loading artifacts {e}')
-        return None,None
+        return None, None
     
-model,vectorizer = load_model()
+model, vectorizer = load_model()
 
 def preprocess(sentence_input):
-    text = re.sub(r'[^0-9a-zA-Z]+',' ',sentence_input).split()
-    words = [x.lower() for x in text if x not in stopwords.words('english')]
+    text = re.sub(r'[^0-9a-zA-Z]+',' ', sentence_input).split()
+    # Don't remove ALL stopwords - keep important ones like "not", "very", "good"
+    stop_words = set(stopwords.words('english')) - {'not', 'no', 'very', 'good', 'bad', 'great'}
+    words = [x.lower() for x in text if x.lower() not in stop_words]
     lemma = WordNetLemmatizer()
-    word = [lemma.lemmatize(word,'v') for word in words ]
+    word = [lemma.lemmatize(w, 'v') for w in words]
     word = ' '.join(word)
     return word
 
@@ -49,45 +51,50 @@ def resultOutput(result):
     
 def sentiment_prediction(sentence_input):
     try:
-        sentence_value = preprocess(sentence_input) # possible error (float not used, cause it cames as sentence)
-        if sentence_value is None:
-            return "Enter Sentence to analyse sentiment."
+        sentence_value = preprocess(sentence_input)
+        
+        if not sentence_value or sentence_value.strip() == "":
+            return "Enter Sentence to analyse sentiment.", 0
     
-        if vectorizer is not None and hasattr(vectorizer,'transform'):
-            vectorized_data = vectorizer.transform(sentence_value)
+        if vectorizer is not None and hasattr(vectorizer, 'transform'):
+            # vectorizer.transform expects a list/iterable, not a string
+            vectorized_data = vectorizer.transform([sentence_value])
         else:
-            print("Vectorizer not available or invalid")
+            return "Vectorizer not available or invalid", 0
 
         prediction = model.predict(vectorized_data)
         probabilities = model.predict_proba(vectorized_data)
         predicted_sentiment = int(prediction[0])
-        confidence = probabilities[0][predicted_sentiment]
+        confidence = float(probabilities[0][predicted_sentiment])
 
-        return predicted_sentiment,confidence 
+        return predicted_sentiment, confidence 
     except Exception as e:
-        return f"Prediction Error {e}"
+        return f"Prediction Error: {e}", 0
     
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/predict',methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     try:
-        sentence_input = request.form.get('sentence',"")
+        sentence_input = request.form.get('sentence', "")
 
-        if not sentence_input:
+        if not sentence_input or sentence_input.strip() == "":
             return jsonify({
                 'success': False,
                 'error': 'Please enter the sentence first.'
             })
+        
         result, confidence = sentiment_prediction(sentence_input)
 
-        if isinstance(result, str) and (result.startswith("Error") or result.startswith("Prediction Error")):
+        # Check if result is a string (error message)
+        if isinstance(result, str):
             return jsonify({
                 'success': False,
                 'error': result
             })
+        
         result_output = resultOutput(result)
 
         return jsonify({

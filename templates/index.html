@@ -3,13 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sentiment Analyzer</title>
+    <title>AI Sentiment Analyzer</title>
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>✨ Sentiment Analyzer</h1>
-        <p class="subtitle">Analyze the sentiment of any text using AI</p>
+        <div class="neural-pattern">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="50" cy="15" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="80" cy="25" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="30" cy="50" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="70" cy="55" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="25" cy="80" r="3" fill="currentColor" opacity="0.6"/>
+                <circle cx="60" cy="85" r="3" fill="currentColor" opacity="0.6"/>
+                <line x1="20" y1="20" x2="50" y2="15" stroke="currentColor" opacity="0.3" stroke-width="1"/>
+                <line x1="50" y1="15" x2="80" y2="25" stroke="currentColor" opacity="0.3" stroke-width="1"/>
+                <line x1="20" y1="20" x2="30" y2="50" stroke="currentColor" opacity="0.3" stroke-width="1"/>
+                <line x1="80" y1="25" x2="70" y2="55" stroke="currentColor" opacity="0.3" stroke-width="1"/>
+                <line x1="30" y1="50" x2="25" y2="80" stroke="currentColor" opacity="0.3" stroke-width="1"/>
+                <line x1="70" y1="55" x2="60" y2="85" stroke="currentColor" opacity="0.3" stroke-width="1"/>
+            </svg>
+        </div>
+
+        <div class="header">
+            <h1>✨ AI Sentiment Analyzer</h1>
+            <div class="ai-badge">Developed By Abhishek M</div>
+            <p class="subtitle">Decode emotions with artificial intelligence</p>
+        </div>
 
         <form id="sentimentForm">
             <div class="input-group">
@@ -17,7 +38,7 @@
                 <textarea 
                     id="sentence" 
                     name="sentence" 
-                    placeholder="Type or paste your text here..."
+                    placeholder="Share your thoughts, feelings, or any text..."
                     required
                 ></textarea>
             </div>
@@ -29,7 +50,7 @@
 
         <div class="loader" id="loader">
             <div class="spinner"></div>
-            <p>Analyzing...</p>
+            <p>Processing neural patterns...</p>
         </div>
 
         <div class="result-container" id="resultContainer">
@@ -56,7 +77,6 @@
                 return;
             }
 
-            // Show loader
             loader.style.display = 'block';
             resultContainer.style.display = 'none';
             analyzeBtn.disabled = true;
